@@ -1,0 +1,12 @@
+# Carteleras Grupo para Relevos
+
+Aplicación independiente para consultar la distribución de turnos y puestos.
+
+## Publicación en GitHub Pages
+1. Descomprime este ZIP.
+2. Sube los cuatro archivos (`index.html`, `manifest.json`, `service-worker.js` e `icon.svg`) a la raíz del repositorio `CARTELERAS-GRUPO-RELEVOS`.
+3. En GitHub, entra en Settings → Pages.
+4. Selecciona Deploy from a branch, rama `main` y carpeta `/ (root)`, y guarda.
+
+La aplicación no contiene conexiones al proyecto ni a la dirección web de Esteril.
+La interfaz conserva dependencias externas (Tailwind CSS, Lucide y Google Fonts), por lo que algunas partes visuales necesitan conexión a Internet.

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="description" content="Carteleras Grupo para Relevos: consulta de turnos y puestos de trabajo.">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" href="./icon.svg" type="image/svg+xml">
+    <title>Carteleras Grupo para Relevos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .badge-lav { background-color: #E3F2FD; color: #1565C0; border-left: 4px solid #1565C0; }
+        .badge-mon { background-color: #FFF8E1; color: #E65100; border-left: 4px solid #E65100; }
+        .badge-rec { background-color: #F3E5F5; color: #7B1FA2; border-left: 4px solid #7B1FA2; }
+        .badge-pla { background-color: #E8F5E9; color: #2E7D32; border-left: 4px solid #2E7D32; }
+        .badge-aut { background-color: #FFEBEE; color: #C62828; border-left: 4px solid #C62828; }
+        .badge-lim { background-color: #E0F7FA; color: #00838F; border-left: 4px solid #00838F; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Header / Navbar -->
+    <header class="bg-slate-800/80 backdrop-blur border-b border-slate-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-2 flex flex-wrap justify-between items-center gap-4">
+            
+            <!-- CONTENEDOR DEL LOGO CON LA FOTO REAL -->
+            <div class="flex items-center gap-3">
+                <div class="h-12 w-12 rounded-full border border-slate-600 shadow-lg flex items-center justify-center bg-slate-900 text-orange-400 font-black text-lg">GR</div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white">Carteleras Grupo para Relevos</h1>
+                    <p class="text-xs text-slate-400">Carteleras Grupo para Relevos</p>
+                </div>
+            </div>
+
+            <!-- Controles principales de Navegación por Semana -->
+            <div class="flex items-center bg-slate-900 rounded-lg p-1.5 border border-slate-700 shadow-inner">
+                <button id="btnPrevSemana" class="p-2 hover:bg-slate-800 rounded-md transition text-slate-300 hover:text-white">
+                    <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                </button>
+                <div class="px-4 text-center min-w-[240px]">
+                    <span id="lblSemanaNombre" class="block text-xs font-semibold text-orange-400 uppercase tracking-wider">Semana 1</span>
+                    <span id="lblSemanaRango" class="text-sm font-medium text-white">2 Nov - 8 Nov 2026</span>
+                </div>
+                <button id="btnNextSemana" class="p-2 hover:bg-slate-800 rounded-md transition text-slate-300 hover:text-white">
+                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full space-y-6">
+
+        <!-- Barra de Buscador y Filtro -->
+        <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/60 flex flex-wrap gap-4 justify-between items-center">
+            <div class="relative flex-1 min-w-[280px]">
+                <i data-lucide="search" class="w-5 h-5 absolute left-3 top-2.5 text-slate-400"></i>
+                <input type="text" id="inputBuscar" placeholder="Buscar trabajador por nombre (ej. Sehila, Eba, Jon)..." 
+                       class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-10 pr-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition">
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-400 font-medium">Vista rápida:</span>
+                <button onclick="filtrarTurno('todos')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-700 hover:bg-slate-600 text-white transition">Todos</button>
+                <button onclick="filtrarTurno('manana')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-sky-900/50 text-sky-300 border border-sky-700/50 hover:bg-sky-900 transition">☀️ Mañana</button>
+                <button onclick="filtrarTurno('tarde')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-orange-900/50 text-orange-300 border border-orange-700/50 hover:bg-orange-900 transition">🌅 Tarde</button>
+                <button onclick="filtrarTurno('noche')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-purple-900/50 text-purple-300 border border-purple-700/50 hover:bg-purple-900 transition">🌙 Noche</button>
+            </div>
+        </div>
+
+        <!-- Vista de Turno de Mañana -->
+        <section id="secManana" class="bg-slate-800 rounded-2xl border border-slate-700/80 shadow-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-sky-900/80 to-slate-800 px-6 py-4 border-b border-slate-700 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="p-2 bg-sky-500/20 text-sky-400 rounded-lg"><i data-lucide="sun" class="w-5 h-5"></i></span>
+                    <h2 class="text-lg font-bold text-white">Turno de Mañana</h2>
+                </div>
+                <span class="text-xs font-semibold px-2.5 py-1 bg-sky-500/10 text-sky-400 border border-sky-500/20 rounded-full">Lunes a Domingo</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse" id="tblManana">
+                    <thead>
+                        <tr class="bg-slate-900/80 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-700" id="hdrManana">
+                            <th class="p-3 w-32">Puesto</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-700/50 text-sm" id="bodyManana">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Vista de Turno de Tarde -->
+        <section id="secTarde" class="bg-slate-800 rounded-2xl border border-slate-700/80 shadow-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-orange-900/80 to-slate-800 px-6 py-4 border-b border-slate-700 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="p-2 bg-orange-500/20 text-orange-400 rounded-lg"><i data-lucide="sunset" class="w-5 h-5"></i></span>
+                    <h2 class="text-lg font-bold text-white">Turno de Tarde</h2>
+                </div>
+                <span class="text-xs font-semibold px-2.5 py-1 bg-orange-500/10 text-orange-400 border border-orange-500/20 rounded-full">Lunes a Domingo</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse" id="tblTarde">
+                    <thead>
+                        <tr class="bg-slate-900/80 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-700" id="hdrTarde">
+                            <th class="p-3 w-32">Puesto</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-700/50 text-sm" id="bodyTarde">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Vista de Turno de Noche -->
+        <section id="secNoche" class="bg-slate-800 rounded-2xl border border-slate-700/80 shadow-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-purple-900/80 to-slate-800 px-6 py-4 border-b border-slate-700 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="p-2 bg-purple-500/20 text-purple-400 rounded-lg"><i data-lucide="moon" class="w-5 h-5"></i></span>
+                    <h2 class="text-lg font-bold text-white">Turno de Noche</h2>
+                </div>
+                <span class="text-xs font-semibold px-2.5 py-1 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-full">Lunes a Viernes</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse" id="tblNoche">
+                    <thead>
+                        <tr class="bg-slate-900/80 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-700" id="hdrNoche">
+                            <th class="p-3 w-32">Turno</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-700/50 text-sm" id="bodyNoche">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 border-t border-slate-800 py-4 text-center text-xs text-slate-500">
+        <p>© 2026 Carteleras Grupo para Relevos.</p>
+    </footer>
+
+    <!-- LOGICA ALGORÍTMICA INTERACTIVA DE LA APLICACIÓN -->
+    <script>
+        lucide.createIcons();
+
+        const personas27 = [
+            "Sehila", "Jon", "Yaiza", "Iker", "Mar", "Inma", "Vanesa", "Olga", "Rosa", 
+            "Yolanda S.", "Amaya", "Mari Mar", "Javier", "Ana M", "Monica", "Juami", 
+            "Asier", "Esti", "Fatima", "Silvia", "Mari Mar", "Nuria", "Iñaki", "Mertxe", 
+            "Chelo", "Izaskun", "Tere"
+        ];
+
+        const tabla27Raw = {
+            1: ["D", "D", "M(mon)", "T(lav)", "T(lav)", "D", "M"],
+            2: ["T(lav)", "N", "N", "D", "D", "D", "D"],
+            3: ["T(lav)", "T(mon)", "T(lav)", "T(mon)", "T(plas)", "D", "D"],
+            4: ["T(lav)", "T(mon)", "D", "M(lav)", "M(lav)", "M", "D"],
+            5: ["N", "N", "D", "D", "D", "D", "D"],
+            6: ["T(lav)", "T(mon)", "T(lav)", "T(lim)", "T(recep)", "D", "D"],
+            7: ["M(auto)", "M(auto)", "M(lav)", "D", "T(lav)", "D", "T"],
+            8: ["T(mon)", "T(mon)", "T(lav)", "N", "N", "D", "D"],
+            9: ["D", "D", "T(lav)", "T(mon)", "T(auto)", "T", "D"],
+            10: ["T(mon)", "T(recep)", "N", "N", "N", "D", "D"],
+            11: ["D", "D", "M(lav)", "M(lav)", "M(lim)", "M", "T"],
+            12: ["N", "D", "D", "T(lav)", "T(mon)", "T", "D"],
+            13: ["T(mon)", "T(lav)", "T(auto)", "T(auto)", "T(mon)", "D", "D"],
+            14: ["M(lav)", "M(lav)", "T(mon)", "T(lim)", "T(lim)", "D", "D"],
+            15: ["N", "N", "D", "D", "D", "D", "M"],
+            16: ["D", "T(auto)", "T(mon)", "T(mon)", "T(lim)", "D", "D"],
+            17: ["T(mon)", "T(lim)", "T(lim)", "T(lav)", "T(mon)", "D", "D"],
+            18: ["M(recep)", "M(mon)", "N", "N", "N", "D", "D"],
+            19: ["D", "D", "D", "M(lav)", "M(lav)", "D", "M"],
+            20: ["T(mon)", "T(lim)", "T(lim)", "T(mon)", "T(mon)", "D", "D"],
+            21: ["M(lav)", "D", "M(lim)", "M(plas)", "M(recep)", "M", "D"],
+            22: ["T(mon)", "T(lav)", "N", "N", "D", "D", "D"],
+            23: ["D", "M(lav)", "M(plas)", "M(auto)", "M(lav)", "D", "D"],
+            24: ["T(auto)", "T(mon)", "T(mon)", "T(lav)", "T(lav)", "D", "D"],
+            25: ["N", "N", "D", "D", "D", "D", "M"],
+            26: ["T(lim)", "T(lav)", "T(recep)", "T(plas)", "T(mon)", "D", "D"],
+            27: ["M(lim)", "M(recep)", "T(mon)", "T(mon)", "N", "D", "D"]
+        };
+
+        const personas6 = [
+            { nombre: "Eba", filaBase: 0 },
+            { nombre: "Uxue", filaBase: 1 },
+            { nombre: "Ana Alc", filaBase: 2 },
+            { nombre: "Carolina", filaBase: 3 },
+            { nombre: "Ianire", filaBase: 4 },
+            { nombre: "Yolanda F", filaBase: 5 }
+        ];
+
+        const filas6Puestos = [
+            [["Lunes", "Lavadoras"], ["Martes", "Plasma"], ["Miércoles", "Recepción"], ["Jueves", "Montaje"], ["Viernes", "Autoclave"]],
+            [["Lunes", "Recepción"], ["Martes", "Montaje"], ["Miércoles", "Plasma"], ["Jueves", "Montaje"], ["Viernes", "Lavadoras"]],
+            [["Lunes", "Montaje"], ["Martes", "Lavadoras"], ["Miércoles", "Autoclave"], ["Jueves", "Limpio"], ["Viernes", "Plasma"]],
+            [["Lunes", "Plasma"], ["Martes", "Lavadoras"], ["Miércoles", "Montaje"], ["Jueves", "Recepción"], ["Viernes", "Montaje"]],
+            [["Lunes", "Plasma"], ["Martes", "Limpio"], ["Miércoles", "Lavadoras"], ["Jueves", "Recepción"], ["Viernes", "Montaje"]],
+            [["Lunes", "Limpio"], ["Martes", "Plasma"], ["Miércoles", "Montaje"], ["Jueves", "Montaje"], ["Viernes", "Montaje"]]
+        ];
+
+        const puestosList = ["Lavadoras", "Montaje", "Recepción", "Plasma", "Autoclave", "Limpio"];
+        const diasBase = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+        const puestoCodeMap = { "lav": "Lavadoras", "mon": "Montaje", "recep": "Recepción", "plas": "Plasma", "auto": "Autoclave", "lim": "Limpio" };
+
+        let semanaIndex = 0;
+        const fechaInicioBase = new Date(2026, 10, 2);
+
+        function getFechaRango(index) {
+            let l = new Date(fechaInicioBase);
+            l.setDate(l.getDate() + index * 7);
+            let d = new Date(l);
+            d.setDate(d.getDate() + 6);
+
+            const opciones = { day: 'numeric', month: 'short' };
+            return {
+                rangoStr: `${l.toLocaleDateString('es-ES', opciones)} - ${d.toLocaleDateString('es-ES', opciones)} ${d.getFullYear()}`,
+                lunesObj: l
+            };
+        }
+
+        function renderApp() {
+            const { rangoStr, lunesObj } = getFechaRango(semanaIndex);
+            document.getElementById('lblSemanaNombre').innerText = `SEMANA ${semanaIndex + 1}`;
+            document.getElementById('lblSemanaRango').innerText = rangoStr;
+
+            const diasFechas = diasBase.map((dia, idx) => {
+                let f = new Date(lunesObj);
+                f.setDate(f.getDate() + idx);
+                return `${dia} ${f.getDate()}`;
+            });
+
+            ['hdrManana', 'hdrTarde'].forEach(id => {
+                let tr = document.getElementById(id);
+                tr.innerHTML = `<th class="p-3 w-32 bg-slate-900 text-slate-300 font-semibold border-b border-slate-700">Puesto</th>`;
+                diasFechas.forEach(df => {
+                    tr.innerHTML += `<th class="p-3 text-center font-medium border-b border-slate-700">${df}</th>`;
+                });
+            });
+
+            let trNoche = document.getElementById('hdrNoche');
+            trNoche.innerHTML = `<th class="p-3 w-32 bg-slate-900 text-slate-300 font-semibold border-b border-slate-700">Turno</th>`;
+            diasFechas.slice(0, 5).forEach(df => {
+                trNoche.innerHTML += `<th class="p-3 text-center font-medium border-b border-slate-700">${df}</th>`;
+            });
+
+            let gridManana = {};
+            let gridTarde = {};
+            let gridNoche = {};
+
+            puestosList.forEach(p => {
+                gridManana[p] = {};
+                gridTarde[p] = {};
+                diasBase.forEach(d => { gridManana[p][d] = []; gridTarde[p][d] = []; });
+            });
+            diasBase.slice(0, 5).forEach(d => gridNoche[d] = []);
+
+            personas27.forEach((nombre, idx) => {
+                let numPersona = idx + 1;
+                let semanaTabla27 = ((numPersona - 1 + semanaIndex) % 27) + 1;
+                let fila = tabla27Raw[semanaTabla27];
+
+                fila.forEach((code, dIdx) => {
+                    let dia = diasBase[dIdx];
+                    if (code === "N" && dIdx < 5) {
+                        gridNoche[dia].push(nombre);
+                    } else if (code.startsWith("M")) {
+                        let sub = code.includes("(") ? code.split("(")[1].replace(")", "") : "mon";
+                        let puesto = puestoCodeMap[sub] || "Montaje";
+                        gridManana[puesto][dia].push(nombre);
+                    } else if (code.startsWith("T")) {
+                        let sub = code.includes("(") ? code.split("(")[1].replace(")", "") : "mon";
+                        let puesto = puestoCodeMap[sub] || "Montaje";
+                        gridTarde[puesto][dia].push(nombre);
+                    }
+                });
+            });
+
+            personas6.forEach(pObj => {
+                let currRow = (pObj.filaBase + semanaIndex) % 6;
+                let assignments = filas6Puestos[currRow];
+                let turno = ((pObj.filaBase + semanaIndex) % 2 === 0) ? "Mañana" : "Tarde";
+
+                assignments.forEach(([dia, puesto]) => {
+                    if (turno === "Mañana") gridManana[puesto][dia].push(pObj.nombre);
+                    else gridTarde[puesto][dia].push(pObj.nombre);
+                });
+            });
+
+            renderGridBody('bodyManana', gridManana);
+            renderGridBody('bodyTarde', gridTarde);
+
+            let bNoche = document.getElementById('bodyNoche');
+            bNoche.innerHTML = `
+                <tr class="hover:bg-slate-700/30 transition">
+                    <td class="p-3 font-semibold text-purple-300 bg-slate-900/40 border-r border-slate-700">Noche</td>
+                    ${diasBase.slice(0,5).map(d => `
+                        <td class="p-3 text-center border-r border-slate-700/50">
+                            <div class="flex flex-wrap justify-center gap-1.5">
+                                ${gridNoche[d].map(n => `<span class="px-2 py-1 rounded bg-purple-900/60 text-purple-200 border border-purple-700/50 text-xs font-semibold">${n}</span>`).join('')}
+                            </div>
+                        </td>
+                    `).join('')}
+                </tr>
+            `;
+
+            aplicarFiltroBusqueda();
+        }
+
+        function renderGridBody(tbodyId, gridData) {
+            let tbody = document.getElementById(tbodyId);
+            tbody.innerHTML = '';
+
+            puestosList.forEach(puesto => {
+                let badgeClass = '';
+                if(puesto === 'Lavadoras') badgeClass = 'badge-lav';
+                else if(puesto === 'Montaje') badgeClass = 'badge-mon';
+                else if(puesto === 'Recepción') badgeClass = 'badge-rec';
+                else if(puesto === 'Plasma') badgeClass = 'badge-pla';
+                else if(puesto === 'Autoclave') badgeClass = 'badge-aut';
+                else if(puesto === 'Limpio') badgeClass = 'badge-lim';
+
+                let tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-700/20 transition border-b border-slate-700/40';
+
+                let tdPuesto = `<td class="p-3 font-bold text-xs ${badgeClass}">${puesto}</td>`;
+                let tdDias = diasBase.map(dia => {
+                    let lista = gridData[puesto][dia];
+                    if (lista.length === 0) return `<td class="p-3 text-center text-slate-600 font-light text-xs">-</td>`;
+                    return `
+                        <td class="p-2 text-center border-r border-slate-700/30">
+                            <div class="flex flex-col gap-1 items-center justify-center">
+                                ${lista.map(n => `<span class="persona-tag px-2 py-0.5 rounded bg-slate-900/80 text-slate-200 border border-slate-700 text-xs font-medium hover:border-orange-500 transition">${n}</span>`).join('')}
+                            </div>
+                        </td>
+                    `;
+                }).join('');
+
+                tr.innerHTML = tdPuesto + tdDias;
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('btnPrevSemana').addEventListener('click', () => {
+            if (semanaIndex > 0) { semanaIndex--; renderApp(); }
+        });
+        document.getElementById('btnNextSemana').addEventListener('click', () => {
+            semanaIndex++; renderApp();
+        });
+
+        document.getElementById('inputBuscar').addEventListener('input', aplicarFiltroBusqueda);
+
+        function aplicarFiltroBusqueda() {
+            let val = document.getElementById('inputBuscar').value.toLowerCase().trim();
+            document.querySelectorAll('.persona-tag').forEach(tag => {
+                let name = tag.innerText.toLowerCase();
+                if (val !== "" && name.includes(val)) {
+                    tag.classList.add('bg-orange-500', 'text-white', 'ring-2', 'ring-orange-400');
+                    tag.classList.remove('bg-slate-900/80', 'text-slate-200');
+                } else {
+                    tag.classList.remove('bg-orange-500', 'text-white', 'ring-2', 'ring-orange-400');
+                    tag.classList.add('bg-slate-900/80', 'text-slate-200');
+                }
+            });
+        }
+
+        function filtrarTurno(tipo) {
+            document.getElementById('secManana').style.display = (tipo === 'todos' || tipo === 'manana') ? 'block' : 'none';
+            document.getElementById('secTarde').style.display = (tipo === 'todos' || tipo === 'tarde') ? 'block' : 'none';
+            document.getElementById('secNoche').style.display = (tipo === 'todos' || tipo === 'noche') ? 'block' : 'none';
+        }
+
+        renderApp();
+    </script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js").catch(() => {}));
+      }
+    </script>
+</body>
+</html>

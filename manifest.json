@@ -1,0 +1,10 @@
+{
+  "name": "Carteleras Grupo para Relevos",
+  "short_name": "Relevos",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "description": "Consulta de turnos y puestos de trabajo."
+}
